@@ -14,7 +14,9 @@ routes.get("/", async (req, res) => {
 routes.get("/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    const categoria = await categoryModel.findById(id).populate("parentCategory");
+    const categoria = await categoryModel
+      .findById(id)
+      .populate("parentCategory");
     if (categoria) {
       res.status(200).json(categoria);
     } else {
@@ -60,7 +62,6 @@ routes.put("/:id", async (req, res) => {
   }
 });
 
-
 routes.delete("/:id", async (req, res) => {
   const id = req.params.id;
   try {
@@ -77,4 +78,4 @@ routes.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = routes;

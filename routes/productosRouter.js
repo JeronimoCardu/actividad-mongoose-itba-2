@@ -3,15 +3,32 @@ const productModel = require("../models/productModel");
 const routes = express.Router();
 
 routes.get("/", async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    sort = "createdAt",
+    order = "desc",
+    isActive,
+    name,
+  } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = {};
+  if (name) filter.name = new RegExp(name, "i");
+  if (isActive !== undefined) filter.isActive = isActive === "true";
   try {
-    const productos = await productModel.find().populate("category");
+    const productos = await productModel
+      .find(filter)
+      .populate("category")
+      .limit(parseInt(limit))
+      .skip(parseInt(skip))
+      .sort({ [sort]: order === "desc" ? -1 : 1 });
     res.status(200).json(productos);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener productos" });
   }
 });
 
-routes.get("/:id",  async (req, res) => {
+routes.get("/:id", async (req, res) => {
   const id = req.params.id;
   try {
     const producto = await productModel.findById(id).populate("category");
@@ -24,7 +41,6 @@ routes.get("/:id",  async (req, res) => {
     res.status(500).json({ message: "Error al obtener el producto" });
   }
 });
-
 
 routes.post("/", async (req, res) => {
   const nuevoProducto = req.body;
@@ -61,7 +77,6 @@ routes.put("/:id", async (req, res) => {
   }
 });
 
-
 routes.delete("/:id", async (req, res) => {
   const id = req.params.id;
   try {
@@ -77,6 +92,5 @@ routes.delete("/:id", async (req, res) => {
     res.status(500).json({ message: "Error al eliminar el producto" });
   }
 });
-
 
 module.exports = routes;
