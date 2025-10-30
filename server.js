@@ -4,8 +4,10 @@ const connectDB = require("./db");
 const port = 3000;
 const productosRouter = require("./routes/productosRouter");
 const categoriasRouter = require("./routes/categoriasRouter");
+const authGuard  = require('./middlewares/auth-guard')
 
 app.use(express.json());
+
 
 // Conectamos a la base de datos
 connectDB();
