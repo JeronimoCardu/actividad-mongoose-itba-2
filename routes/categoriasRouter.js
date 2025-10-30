@@ -1,62 +1,44 @@
 const express = require("express");
-const routes = express.Router();
-const categoryModel = require("../models/categoryModel");
+const Category = require("../models/categoryModel");
+const router = express.Router();
 
-routes.get("/", (req, res) => {
-  const categorias = categoryModel.find().populate("parentCategory");
-  res.json(200).json(categorias);
-});
-
-routes.get("/:id", (req, res) => {
-  const id = req.params.id;
-  const categoria = categoryModel
-    .findById(id)
-    .populate("parentCategory");
-  if (categoria) {
-    res.status(200).json(categoria);
-  } else {
-    res.status(404).json({ message: "Categoria no encontrada" });
+// Crear categoría
+router.post("/", async (req, res) => {
+  try {
+    const category = await Category.create(req.body);
+    res.status(201).json(category);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 
-routes.post("/", (req, res) => {
-  const nuevaCategoria = req.body;
-  categoryModel.create(nuevaCategoria);
-  res
-    .status(201)
-    .json({
-      message: "Categoria criada com sucesso!",
-      categoria: nuevaCategoria,
-    });
+// Listar categorías
+router.get("/", async (req, res) => {
+  const categories = await Category.find().populate("parentCategory");
+  res.json(categories);
 });
 
-routes.put("/:id", (req, res) => {
-  const id = req.params.id;
-  const datosActualizados = req.body;
-  const categoriaActualizada = categoryModel.findAndUpdateById(
-    id,
-    datosActualizados,{ new: true , runValidators: true}
-  );
-  if (categoriaActualizada) {
-    res
-      .status(200)
-      .json({
-        message: "Categoria actualizada con éxito!",
-        categoria: categoriaActualizada,
-      });
-  } else {
-    res.status(404).json({ message: "Categoria no encontrada" });
+// Obtener por ID
+router.get("/:id", async (req, res) => {
+  const category = await Category.findById(req.params.id);
+  if (!category) return res.status(404).json({ error: "Categoria no encontrada" });
+  res.json(category);
+});
+
+// Actualizar
+router.put("/:id", async (req, res) => {
+  try {
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(category);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 
-routes.delete("/:id", (req, res) => {
-  const id = req.params.id;
-  const categoriaEliminada = categoryModel.deleteById(id);
-  if (categoriaEliminada) {
-    res.status(200).json({ message: `Categoria ${categoriaEliminada.name} eliminada con éxito!` });
-  } else {
-    res.status(404).json({ message: "Categoria no encontrada" });
-  }
+// Borrar lógico
+router.delete("/:id", async (req, res) => {
+  await Category.findByIdAndUpdate(req.params.id, { isActive: false });
+  res.json({ message: "Categoria desactivada" });
 });
 
-module.exports = routes;
+module.exports = router;
