@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
+const productModel = require("../models/productModel");
 const routes = express.Router();
 
 routes.get("/", (req, res) => {
-  const productos = modelProductos.find().populate("category");
+  const productos = productModel.find().populate("category");
   res.json(200).json(productos);
 });
 
@@ -47,7 +48,11 @@ routes.delete("/:id", (req, res) => {
   const id = req.params.id;
   const productoEliminado = modelProductos.deleteById(id);
   if (productoEliminado) {
-    res.status(200).json({ message: `Producto ${productoEliminado.name} eliminado con éxito!` });
+    res
+      .status(200)
+      .json({
+        message: `Producto ${productoEliminado.name} eliminado con éxito!`,
+      });
   } else {
     res.status(404).json({ message: "Producto no encontrado" });
   }

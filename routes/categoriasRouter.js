@@ -1,14 +1,15 @@
 const express = require("express");
 const routes = express.Router();
+const categoryModel = require("../models/categoryModel");
 
 routes.get("/", (req, res) => {
-  const categorias = modelCategorias.find().populate("parentCategory");
+  const categorias = categoryModel.find().populate("parentCategory");
   res.json(200).json(categorias);
 });
 
 routes.get("/:id", (req, res) => {
   const id = req.params.id;
-  const categoria = modelCategorias
+  const categoria = categoryModel
     .findById(id)
     .populate("parentCategory");
   if (categoria) {
@@ -20,7 +21,7 @@ routes.get("/:id", (req, res) => {
 
 routes.post("/", (req, res) => {
   const nuevaCategoria = req.body;
-  modelCategorias.create(nuevaCategoria);
+  categoryModel.create(nuevaCategoria);
   res
     .status(201)
     .json({
@@ -32,7 +33,7 @@ routes.post("/", (req, res) => {
 routes.put("/:id", (req, res) => {
   const id = req.params.id;
   const datosActualizados = req.body;
-  const categoriaActualizada = modelCategorias.findAndUpdateById(
+  const categoriaActualizada = categoryModel.findAndUpdateById(
     id,
     datosActualizados,{ new: true , runValidators: true}
   );
@@ -50,7 +51,7 @@ routes.put("/:id", (req, res) => {
 
 routes.delete("/:id", (req, res) => {
   const id = req.params.id;
-  const categoriaEliminada = modelCategorias.deleteById(id);
+  const categoriaEliminada = categoryModel.deleteById(id);
   if (categoriaEliminada) {
     res.status(200).json({ message: `Categoria ${categoriaEliminada.name} eliminada con éxito!` });
   } else {

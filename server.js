@@ -2,9 +2,18 @@ const express = require("express");
 const app = express();
 const connectDB = require("./db");
 const port = 3000;
+const productosRouter = require("./routes/productosRouter");
+const categoriasRouter = require("./routes/categoriasRouter");
 
-// Conectamos a la base de datos 
+app.use(express.json());
+
+// Conectamos a la base de datos
 connectDB();
+
+// endpoints
+
+app.use("/api/productos", productosRouter);
+app.use("/api/categorias", categoriasRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
