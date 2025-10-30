@@ -4,7 +4,10 @@ const routes = express.Router();
 
 routes.get("/", async (req, res) => {
   try {
-    const productos = await productModel.find().populate("category");
+    // Return only products that are available (logical deletion)
+    const productos = await productModel
+      .find({ isAvailable: true, isDeleted: false })
+      .populate("category");
     res.status(200).json(productos);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener productos" });
@@ -14,7 +17,10 @@ routes.get("/", async (req, res) => {
 routes.get("/:id",  async (req, res) => {
   const id = req.params.id;
   try {
-    const producto = await productModel.findById(id).populate("category");
+    // Only return the product if it is available (logical deletion)
+    const producto = await productModel
+      .findOne({ _id: id, isAvailable: true, isDeleted: false })
+      .populate("category");
     if (producto) {
       res.status(200).json(producto);
     } else {
@@ -61,14 +67,27 @@ routes.put("/:id", async (req, res) => {
   }
 });
 
+routes.delete("/", async (req, res) => {
+  try {
+    await productModel.deleteMany({ isDeleted: true });
+    res.status(200).json({ message: "Productos eliminados con éxito!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al eliminar productos" });
+  }
+});
 
 routes.delete("/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    const productoEliminado = await productModel.findByIdAndDelete(id);
-    if (productoEliminado) {
+    const productoActualizado = await productModel.findByIdAndUpdate(
+      id,
+      { isAvailable: false, isDeleted: true },
+      { new: true }
+    );
+    if (productoActualizado) {
       res.status(200).json({
-        message: `Producto ${productoEliminado.name} eliminado con éxito!`,
+        message: `Producto ${productoActualizado.name} marcado como no disponible.`,
+        producto: productoActualizado,
       });
     } else {
       res.status(404).json({ message: "Producto no encontrado" });
